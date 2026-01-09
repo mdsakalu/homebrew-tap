@@ -1,10 +1,10 @@
 class Macnetmon < Formula
   desc "Network interface bandwidth monitor for macOS"
   homepage "https://github.com/mdsakalu/macnetmon"
-  url "https://github.com/mdsakalu/macnetmon/releases/download/v0.1.1/macnetmon-v0.1.1.tar.gz"
-  sha256 "fc5f0dd3c94af7366b33baf6e8412edce2f32c2d334f32bcf390440403daff99"
+  url "https://github.com/mdsakalu/macnetmon/releases/download/v0.1.2/macnetmon-v0.1.2.tar.gz"
+  sha256 "958ac5f7990bd915ed5305598e9a68870f2c39874149615f6bdf9ff2ecd3ea7c"
   license "MIT"
-  version "0.1.1"
+  version "0.1.2"
 
   depends_on :macos
 
