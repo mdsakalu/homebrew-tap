@@ -1,8 +1,8 @@
 cask "barista" do
-  version "0.1.4"
-  sha256 "876b4d957499db3547a7f7077f38970dc49d42bcc044b7785a9855f28505837c"
+  version "0.1.5"
+  sha256 "86d4ecf0f9a73434f0a2c521fc60e04590c5978f56684be4a2ef61ba00d4ac8f"
 
-  url "https://github.com/mdsakalu/barista/releases/download/v0.1.4/Barista-macos.zip"
+  url "https://github.com/mdsakalu/barista/releases/download/v0.1.5/Barista-macos.zip"
   name "Barista"
   desc "Menu bar app that wraps caffeinate for keep-awake control"
   homepage "https://github.com/mdsakalu/barista"
