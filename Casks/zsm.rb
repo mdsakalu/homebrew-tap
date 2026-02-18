@@ -3,7 +3,7 @@ cask "zsm" do
   name "zsm"
   desc "TUI session manager for zmx"
   homepage "https://github.com/mdsakalu/zmx-session-manager"
-  version "0.2.1"
+  version "0.3.0"
 
   livecheck do
     skip "Auto-generated on release."
@@ -14,22 +14,22 @@ cask "zsm" do
   on_macos do
     on_intel do
       url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_darwin_amd64.tar.gz"
-      sha256 "c86d097fc1a7485fc6fd802339cc855f1f00e344597abbb0956e5bd23d3ae18f"
+      sha256 "b4cd9c43fae6f600cd9a701074e03a75ba743174dcdacad6985ccf43e25c5e67"
     end
     on_arm do
       url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_darwin_arm64.tar.gz"
-      sha256 "0c49b871cf3ef3544050d4b18ecd3f6efe023f193a0e8ab12c619d025c1fc431"
+      sha256 "de257e215aa45759114d9020f5fa3df7b4b1c731e0233ee21931d7f5e529540b"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_linux_amd64.tar.gz"
-      sha256 "093067a416452b3797e027f4fb3c0909b4b483841131fc5758b35fdffaa2840e"
+      sha256 "bc52314b1a355911fb85703984e04de09fef35004a7d791fa5e5b97993111370"
     end
     on_arm do
       url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_linux_arm64.tar.gz"
-      sha256 "8233883aee0bf65465845ac778c129dd14044b19356a8c44a497f1d975f74ac3"
+      sha256 "1526773b2d801b1a8b7731baec5fab49d4c491e1591f522ddbaa225c329b500b"
     end
   end
 
