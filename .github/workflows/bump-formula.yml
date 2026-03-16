@@ -1,0 +1,46 @@
+name: Bump Formula
+
+on:
+  repository_dispatch:
+    types: [bump-formula]
+
+# Expects client_payload:
+#   formula: formula name (e.g. "herald")
+#   version: version tag (e.g. "v0.1.0")
+#   url: download URL for the release tarball
+#   repo: source repo (e.g. "mdsakalu/herald")
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download and checksum
+        run: |
+          curl -sL "${{ github.event.client_payload.url }}" -o release.tar.gz
+          SHA256=$(shasum -a 256 release.tar.gz | cut -d ' ' -f 1)
+          echo "sha256=${SHA256}" >> "$GITHUB_ENV"
+
+      - name: Update formula
+        run: |
+          FORMULA="Formula/${{ github.event.client_payload.formula }}.rb"
+          VERSION="${{ github.event.client_payload.version }}"
+          VERSION="${VERSION#v}"
+          URL="${{ github.event.client_payload.url }}"
+          SHA="${{ env.sha256 }}"
+
+          sed -i "s|url \".*\"|url \"${URL}\"|" "$FORMULA"
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA}\"|" "$FORMULA"
+          sed -i "s|version \".*\"|version \"${VERSION}\"|" "$FORMULA"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          FORMULA="${{ github.event.client_payload.formula }}"
+          VERSION="${{ github.event.client_payload.version }}"
+          git add "Formula/${FORMULA}.rb"
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Bump ${FORMULA} to ${VERSION}"
+          git push
