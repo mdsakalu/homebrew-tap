@@ -1,46 +1,78 @@
-name: Bump Formula
+name: Auto-update formulas
 
 on:
-  repository_dispatch:
-    types: [bump-formula]
-
-# Expects client_payload:
-#   formula: formula name (e.g. "herald")
-#   version: version tag (e.g. "v0.1.0")
-#   url: download URL for the release tarball
-#   repo: source repo (e.g. "mdsakalu/herald")
+  schedule:
+    - cron: "0 */6 * * *"  # Every 6 hours
+  workflow_dispatch: {}
 
 jobs:
-  bump:
+  update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download and checksum
+      - name: Check and bump formulas
         run: |
-          curl -sL "${{ github.event.client_payload.url }}" -o release.tar.gz
-          SHA256=$(shasum -a 256 release.tar.gz | cut -d ' ' -f 1)
-          echo "sha256=${SHA256}" >> "$GITHUB_ENV"
+          UPDATED=false
 
-      - name: Update formula
-        run: |
-          FORMULA="Formula/${{ github.event.client_payload.formula }}.rb"
-          VERSION="${{ github.event.client_payload.version }}"
-          VERSION="${VERSION#v}"
-          URL="${{ github.event.client_payload.url }}"
-          SHA="${{ env.sha256 }}"
+          for formula in Formula/*.rb; do
+            NAME=$(basename "$formula" .rb)
+            
+            # Extract current version and URL pattern from formula
+            CURRENT=$(grep 'version "' "$formula" | head -1 | sed 's/.*version "\(.*\)"/\1/')
+            HOMEPAGE=$(grep 'homepage "' "$formula" | sed 's/.*homepage "\(.*\)"/\1/')
+            
+            # Derive owner/repo from homepage
+            REPO=$(echo "$HOMEPAGE" | sed 's|https://github.com/||')
+            
+            if [ -z "$REPO" ]; then
+              echo "[$NAME] Skipping — no GitHub homepage"
+              continue
+            fi
 
-          sed -i "s|url \".*\"|url \"${URL}\"|" "$FORMULA"
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA}\"|" "$FORMULA"
-          sed -i "s|version \".*\"|version \"${VERSION}\"|" "$FORMULA"
+            # Get latest release tag
+            LATEST=$(gh api "repos/${REPO}/releases/latest" --jq '.tag_name' 2>/dev/null || echo "")
+            LATEST_VERSION="${LATEST#v}"
+
+            if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "$CURRENT" ]; then
+              echo "[$NAME] Up to date (${CURRENT})"
+              continue
+            fi
+
+            echo "[$NAME] ${CURRENT} → ${LATEST_VERSION}"
+
+            # Build download URL from the release assets (first .tar.gz)
+            DOWNLOAD_URL=$(gh api "repos/${REPO}/releases/latest" --jq '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url' 2>/dev/null | head -1)
+
+            if [ -z "$DOWNLOAD_URL" ]; then
+              echo "[$NAME] Skipping — no .tar.gz asset in release"
+              continue
+            fi
+
+            # Download and compute SHA256
+            curl -sL "$DOWNLOAD_URL" -o /tmp/release.tar.gz
+            SHA256=$(shasum -a 256 /tmp/release.tar.gz | cut -d ' ' -f 1)
+            rm /tmp/release.tar.gz
+
+            # Update formula
+            sed -i "s|url \".*\"|url \"${DOWNLOAD_URL}\"|" "$formula"
+            sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" "$formula"
+            sed -i "s|version \".*\"|version \"${LATEST_VERSION}\"|" "$formula"
+
+            UPDATED=true
+            echo "[$NAME] Updated to ${LATEST_VERSION} (sha256: ${SHA256})"
+          done
+
+          echo "updated=${UPDATED}" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Commit and push
+        if: env.updated == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          FORMULA="${{ github.event.client_payload.formula }}"
-          VERSION="${{ github.event.client_payload.version }}"
-          git add "Formula/${FORMULA}.rb"
+          git add Formula/
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "Bump ${FORMULA} to ${VERSION}"
+          git commit -m "Auto-update formulas to latest releases"
           git push
