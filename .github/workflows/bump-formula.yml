@@ -2,7 +2,7 @@ name: Auto-update formulas
 
 on:
   schedule:
-    - cron: "0 */6 * * *"  # Every 6 hours
+    - cron: "0 */6 * * *"
   workflow_dispatch: {}
 
 jobs:
@@ -11,68 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Check and bump formulas
-        run: |
-          UPDATED=false
-
-          for formula in Formula/*.rb; do
-            NAME=$(basename "$formula" .rb)
-            
-            # Extract current version and URL pattern from formula
-            CURRENT=$(grep 'version "' "$formula" | head -1 | sed 's/.*version "\(.*\)"/\1/')
-            HOMEPAGE=$(grep 'homepage "' "$formula" | sed 's/.*homepage "\(.*\)"/\1/')
-            
-            # Derive owner/repo from homepage
-            REPO=$(echo "$HOMEPAGE" | sed 's|https://github.com/||')
-            
-            if [ -z "$REPO" ]; then
-              echo "[$NAME] Skipping — no GitHub homepage"
-              continue
-            fi
-
-            # Get latest release tag
-            LATEST=$(gh api "repos/${REPO}/releases/latest" --jq '.tag_name' 2>/dev/null || echo "")
-            LATEST_VERSION="${LATEST#v}"
-
-            if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" = "$CURRENT" ]; then
-              echo "[$NAME] Up to date (${CURRENT})"
-              continue
-            fi
-
-            echo "[$NAME] ${CURRENT} → ${LATEST_VERSION}"
-
-            # Build download URL from the release assets (first .tar.gz)
-            DOWNLOAD_URL=$(gh api "repos/${REPO}/releases/latest" --jq '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url' 2>/dev/null | head -1)
-
-            if [ -z "$DOWNLOAD_URL" ]; then
-              echo "[$NAME] Skipping — no .tar.gz asset in release"
-              continue
-            fi
-
-            # Download and compute SHA256
-            curl -sL "$DOWNLOAD_URL" -o /tmp/release.tar.gz
-            SHA256=$(shasum -a 256 /tmp/release.tar.gz | cut -d ' ' -f 1)
-            rm /tmp/release.tar.gz
-
-            # Update formula
-            sed -i "s|url \".*\"|url \"${DOWNLOAD_URL}\"|" "$formula"
-            sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" "$formula"
-            sed -i "s|version \".*\"|version \"${LATEST_VERSION}\"|" "$formula"
-
-            UPDATED=true
-            echo "[$NAME] Updated to ${LATEST_VERSION} (sha256: ${SHA256})"
-          done
-
-          echo "updated=${UPDATED}" >> "$GITHUB_ENV"
+      - name: Update formulas
+        run: .github/scripts/bump-formulas.sh
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Commit and push
-        if: env.updated == 'true'
+      - name: Commit
         run: |
+          git diff --quiet && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/
-          git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "Auto-update formulas to latest releases"
           git push
