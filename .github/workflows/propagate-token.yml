@@ -1,0 +1,30 @@
+name: Propagate HOMEBREW_TAP_TOKEN
+
+on:
+  workflow_dispatch:
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Propagate token to consumer repos
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          repos=(
+            mdsakalu/marktext
+            mdsakalu/macnetmon
+            mdsakalu/barista
+            mdsakalu/herald
+            mdsakalu/cmux
+            mdsakalu/zmx-session-manager
+          )
+
+          for repo in "${repos[@]}"; do
+            echo "Setting HOMEBREW_TAP_TOKEN on $repo..."
+            if echo "$GH_TOKEN" | gh secret set HOMEBREW_TAP_TOKEN -R "$repo"; then
+              echo "  ✓ $repo"
+            else
+              echo "  ✗ $repo (failed)"
+            fi
+          done
