@@ -10,7 +10,7 @@ class Herald < Formula
 
   def install
     prefix.install "Herald.app"
-    (bin/"herald").make_symlink(prefix/"Herald.app/Contents/MacOS/herald")
+    bin.install_symlink prefix/"Herald.app/Contents/MacOS/herald"
   end
 
   test do
