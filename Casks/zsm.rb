@@ -3,24 +3,23 @@ cask "zsm" do
   version "0.4.0"
 
   on_macos do
-    on_intel do
-      sha256 "d601701ff3efb61c1d1cf647a13e18bb63f121a40a1de81c67be091febc9c019"
-      url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_darwin_amd64.tar.gz"
-    end
     on_arm do
       sha256 "b0a38eee44b9575413728aeaeb893d0cf5f4903268159b69a432ddcb6acaf395"
       url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_darwin_arm64.tar.gz"
     end
-  end
-
-  on_linux do
     on_intel do
-      sha256 "eecc3b533448ef89674b0c53a9168f971bb19fce3fe08a7674a875b38e65b88b"
-      url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_linux_amd64.tar.gz"
+      sha256 "d601701ff3efb61c1d1cf647a13e18bb63f121a40a1de81c67be091febc9c019"
+      url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_darwin_amd64.tar.gz"
     end
+  end
+  on_linux do
     on_arm do
       sha256 "fe1f66e6dc557e0434792d2fb47d9599f560cc56892505415bc4fdaefc70fad1"
       url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_linux_arm64.tar.gz"
+    end
+    on_intel do
+      sha256 "eecc3b533448ef89674b0c53a9168f971bb19fce3fe08a7674a875b38e65b88b"
+      url "https://github.com/mdsakalu/zmx-session-manager/releases/download/v#{version}/zmx-session-manager_#{version}_linux_amd64.tar.gz"
     end
   end
 
@@ -42,5 +41,4 @@ cask "zsm" do
   end
 
   # No zap stanza required
-
 end
