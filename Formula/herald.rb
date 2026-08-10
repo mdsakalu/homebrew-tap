@@ -1,10 +1,10 @@
 class Herald < Formula
   desc "Modern macOS notification CLI built on UNUserNotificationCenter"
   homepage "https://github.com/mdsakalu/herald"
-  url "https://github.com/mdsakalu/herald/releases/download/v0.2.0/herald-v0.2.0.tar.gz"
-  sha256 "d09bef12690a7a75ba2bd1aa793b574b964f2fdcecbe44b7309dcedde2e59b01"
+  url "https://github.com/mdsakalu/herald/releases/download/v0.3.0/herald-v0.3.0.tar.gz"
+  sha256 "2ae06f705cb79b23e2fcc10805f7bfad624d5da05f9fdd4f8699f3e38e72fefa"
   license "MIT"
-  version "0.2.0"
+  version "0.3.0"
 
   depends_on :macos
 
