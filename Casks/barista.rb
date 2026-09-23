@@ -11,9 +11,9 @@ cask "barista" do
 
   app "Barista.app"
 
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-dr", "com.apple.quarantine", "#{appdir}/Barista.app"]
+  postflight_steps do
+    run "/usr/bin/xattr",
+        args: ["-dr", "com.apple.quarantine", "{{appdir}}/Barista.app"]
   end
 
   zap trash: "~/Library/Preferences/com.mdsakalu.barista.plist"
